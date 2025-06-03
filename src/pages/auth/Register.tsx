@@ -4,7 +4,7 @@ import {
   signInWithPopup, // For Google Sign-In
   GoogleAuthProvider // Provider for Google Sign-In
 } from 'firebase/auth';
-import { auth } from '../../lib/utils/firebase'; // Assuming this is where your Firebase auth instance is
+import { auth } from '../../lib/utils/firebase'; 
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Register() {
