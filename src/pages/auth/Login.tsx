@@ -24,7 +24,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // No need to navigate here - useEffect will handle it
+      // No need to navigate here , useEffect will handle it the redirection
     } catch (error) {
       console.error('Login error:', error);
       setError(
