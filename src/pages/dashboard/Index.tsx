@@ -3,6 +3,7 @@ import { ref, push, remove, update, onValue } from 'firebase/database';
 import { rtdb, auth } from '../../lib/utils/firebase';
 import type { Employee } from '../../lib/types/employee';
 import { useNavigate } from 'react-router-dom';
+import { Table } from '../../components/Table';
 
 export default function Dashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -17,7 +18,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up real-time listener
     const employeesRef = ref(rtdb, 'employees');
     const unsubscribe = onValue(employeesRef, (snapshot) => {
       const data = snapshot.val();
@@ -32,7 +32,6 @@ export default function Dashboard() {
       }
     });
 
-    // Cleanup subscription
     return () => {
       unsubscribe();
     };
@@ -136,35 +135,11 @@ export default function Dashboard() {
         </button>
       </form>
 
-      <div className="grid gap-4">
-        {employees.map((employee) => (
-          <div
-            key={employee.id}
-            className="border p-4 rounded shadow-sm flex justify-between items-center"
-          >
-            <div>
-              <h3 className="font-bold">{employee.name}</h3>
-              <p>{employee.email}</p>
-              <p>{employee.position} - {employee.department}</p>
-              <p>Started: {employee.startDate}</p>
-            </div>
-            <div className="space-x-2">
-              <button
-                onClick={() => handleEdit(employee)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => employee.id && handleDelete(employee.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Table 
+        employees={employees}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }
