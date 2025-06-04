@@ -1,145 +1,66 @@
-import { useState, useEffect } from 'react';
-import { ref, push, remove, update, onValue } from 'firebase/database';
-import { rtdb, auth } from '../../lib/utils/firebase';
-import type { Employee } from '../../lib/types/employee';
 import { useNavigate } from 'react-router-dom';
-import { Table } from '../../components/Table';
+import { Header } from '../../components/Header';
 
-export default function Dashboard() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [formData, setFormData] = useState<Omit<Employee, 'id'>>({
-    name: '',
-    email: '',
-    position: '',
-    department: '',
-    startDate: '',
-  });
-  const [editId, setEditId] = useState<string | null>(null);
+export default function Index() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const employeesRef = ref(rtdb, 'employees');
-    const unsubscribe = onValue(employeesRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const employeeList = Object.entries(data).map(([id, values]) => ({
-          id,
-          ...(values as Omit<Employee, 'id'>)
-        }));
-        setEmployees(employeeList);
-      } else {
-        setEmployees([]);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editId) {
-        // Update existing employee
-        const updates = {
-          [`employees/${editId}`]: formData
-        };
-        await update(ref(rtdb), updates);
-      } else {
-        // Add new employee
-        await push(ref(rtdb, 'employees'), {
-          ...formData,
-          submittedAt: new Date().toISOString()
-        });
-      }
-      setFormData({ name: '', email: '', position: '', department: '', startDate: '' });
-      setEditId(null);
-    } catch (error) {
-      console.error('Error saving employee:', error);
-      alert('Error saving employee data');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await remove(ref(rtdb, `employees/${id}`));
-    } catch (error) {
-      console.error('Error deleting employee:', error);
-      alert('Error deleting employee');
-    }
-  };
-
-  const handleEdit = (employee: Employee) => {
-    setFormData(employee);
-    setEditId(employee.id || null);
-  };
-
-  const handleSignOut = async () => {
-    await auth.signOut();
-    navigate('/login');
-  };
-
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Employee Dashboard</h1>
-        <button
-          onClick={handleSignOut}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Sign Out
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-500"></div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Position"
-          value={formData.position}
-          onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Department"
-          value={formData.department}
-          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
-        <input
-          type="date"
-          value={formData.startDate}
-          onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-          className="w-full px-3 py-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          {editId ? 'Update Employee' : 'Add Employee'}
-        </button>
-      </form>
+      <div className="relative z-10 container mx-auto p-6">
+        <Header />
+        
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Main Title */}
+            <h1 className="text-7xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
+              Employee Management
+            </h1>
+            <p className="text-slate-300 text-xl mb-12 max-w-2xl mx-auto">
+              Streamline your workforce management with our modern, intuitive dashboard. Add new employees and manage your team effortlessly.
+            </p>
 
-      <Table 
-        employees={employees}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+            {/* Navigation Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+              {/* Add Employee Card */}
+              <div 
+                className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 group cursor-pointer"
+                onClick={() => navigate('/add-employee')}
+              >
+                <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:rotate-12 transition-transform duration-300">
+                  <span className="text-3xl">➕</span>
+                </div>
+                <h3 className="text-2xl font-semibold text-white mb-4">Add Employee</h3>
+                <p className="text-slate-300 mb-6">Create new employee records with detailed information and manage their profiles.</p>
+                <button className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
+                  Get Started
+                </button>
+              </div>
+
+              {/* View Employees Card */}
+              <div 
+                className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 group cursor-pointer"
+                onClick={() => navigate('/employees')} 
+              >
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:rotate-12 transition-transform duration-300">
+                  <span className="text-3xl">👥</span>
+                </div>
+                <h3 className="text-2xl font-semibold text-white mb-4">View Employees</h3>
+                <p className="text-slate-300 mb-6">Browse, edit, and manage your existing employee database with advanced filtering.</p>
+                <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+                  View All
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

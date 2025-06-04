@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Dashboard from '../pages/dashboard/Index';
+import AddEmployee from '../pages/dashboard/AddEmployee';
+import Employees from '../pages/dashboard/Employee';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -18,6 +20,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/add-employee',
+    element: (
+      <ProtectedRoute>
+        <AddEmployee />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/employees',
+    element: (
+      <ProtectedRoute>
+        <Employees />
       </ProtectedRoute>
     ),
   },
