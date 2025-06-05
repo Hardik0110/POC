@@ -60,30 +60,20 @@ export default function Employees() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-500"></div>
-      </div>
-
-      <div className="relative z-10 container mx-auto p-6">
+    <div className="common-background">
+      <div className="page-container">
         <Header />
         
         <div className="mt-8">
           {/* Navigation */}
           <div className="flex items-center justify-between mb-8">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-300"
-            >
+            <button onClick={() => navigate('/')} className="back-button">
               <span className="text-xl">←</span>
               Back to Home
             </button>
             <button
               onClick={() => navigate('/add-employee')}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              className="gradient-button flex items-center gap-2 px-6 py-3"
             >
               <span className="text-lg">➕</span>
               Add New Employee
@@ -92,24 +82,22 @@ export default function Employees() {
 
           {/* Title Section */}
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-              Employee Directory
-            </h1>
-            <p className="text-slate-300 text-lg">Manage and view all your team members in one place</p>
+            <h1 className="page-title">Employee Directory</h1>
+            <p className="page-subtitle">Manage and view all your team members in one place</p>
           </div>
 
           {/* Filters Section */}
           <div className="max-w-4xl mx-auto mb-8">
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 shadow-2xl">
+            <div className="card-container">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Search Employees</label>
+                  <label className="form-label">Search Employees</label>
                   <input
                     type="text"
                     placeholder="Search by name, email, or position..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                    className="form-input focus:ring-cyan-400"
                   />
                 </div>
                 <div className="space-y-2">
@@ -132,19 +120,19 @@ export default function Employees() {
           {/* Statistics Cards */}
           <div className="max-w-6xl mx-auto mb-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+              <div className="stats-card">
                 <div className="text-3xl font-bold text-cyan-400">{employees.length}</div>
                 <div className="text-slate-300 text-sm">Total Employees</div>
               </div>
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+              <div className="stats-card">
                 <div className="text-3xl font-bold text-purple-400">{departments.length}</div>
                 <div className="text-slate-300 text-sm">Departments</div>
               </div>
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+              <div className="stats-card">
                 <div className="text-3xl font-bold text-pink-400">{filteredEmployees.length}</div>
                 <div className="text-slate-300 text-sm">Filtered Results</div>
               </div>
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl p-4 text-center">
+              <div className="stats-card">
                 <div className="text-3xl font-bold text-green-400">
                   {employees.filter(emp => {
                     const startDate = new Date(emp.startDate);
@@ -160,7 +148,7 @@ export default function Employees() {
 
           {/* Table Section */}
           <div className="max-w-7xl mx-auto">
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl">
+            <div className="card-container">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
                   <div className="w-2 h-8 bg-gradient-to-b from-pink-400 to-cyan-500 rounded-full"></div>

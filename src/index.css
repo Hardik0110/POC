@@ -1,1 +1,85 @@
 @import "tailwindcss";
+
+/* Common Background Styles */
+.common-background {
+  @apply min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
+}
+
+/* Common Animated Background */
+.animated-background {
+  @apply absolute inset-0 overflow-hidden;
+}
+
+.animated-blob {
+  @apply absolute w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse;
+}
+
+.blob-1 {
+  @apply -top-40 -right-40 bg-purple-500;
+}
+
+.blob-2 {
+  @apply -bottom-40 -left-40 bg-cyan-500 delay-1000;
+}
+
+.blob-3 {
+  @apply top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-pink-500 delay-500;
+}
+
+/* Common Card Styles */
+.glass-card {
+  @apply backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl shadow-2xl;
+}
+
+/* Common Button Styles */
+.gradient-button {
+  @apply bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 
+         text-white font-semibold rounded-xl shadow-lg 
+         hover:shadow-xl transition-all duration-300 
+         hover:scale-105 active:scale-95;
+}
+
+/* Common Form Input Styles */
+.form-input {
+  @apply w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white 
+         placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300;
+}
+
+.form-label {
+  @apply text-sm font-medium text-slate-300;
+}
+
+/* Common Text Gradient */
+.gradient-text {
+  @apply bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 
+         bg-clip-text text-transparent;
+}
+
+/* Common Layout Styles */
+.page-container {
+  @apply relative z-10 container mx-auto p-6;
+}
+
+/* Common Navigation Styles */
+.back-button {
+  @apply flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-300;
+}
+
+/* Common Title Section */
+.page-title {
+  @apply text-5xl font-bold gradient-text mb-4;
+}
+
+.page-subtitle {
+  @apply text-slate-300 text-lg;
+}
+
+/* Common Card Container */
+.card-container {
+  @apply backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl;
+}
+
+/* Common Stats Card */
+.stats-card {
+  @apply backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl p-4 text-center;
+}

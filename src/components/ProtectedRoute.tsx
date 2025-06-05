@@ -1,18 +1,15 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/hooks/useAuth';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div>Loading...</div>; // Add a loading state
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <>{children}</>;
+  const location = useLocation();
+
+  if (loading) return null;
+
+  return user
+    ? <>{children}</>
+    : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoute;
