@@ -1,36 +1,28 @@
-import { useState, useEffect } from 'react';
-import { ref, remove, onValue } from 'firebase/database';
+import { ref, remove } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import { rtdb } from '../../lib/utils/firebase';
 import type { Employee } from '../../lib/types/employee';
 import { Table } from '../../components/Table';
-import { Header } from '../../components/Header';
+import { Layout } from '../../components/Layout';
+import { FormField } from '../../components/FormField';
+import { Input } from '../../components/Input';
+import { Select } from '../../components/Select';
+import { StatsCard } from '../../components/StatsCard';
+import { EmptyState } from '../../components/EmptyState';
+import { useEmployees } from '../../lib/hooks/useEmployees';
+import { useEmployeeFilters } from '../../lib/hooks/useEmployeeFilters';
 
 export default function Employees() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('');
+  const { employees } = useEmployees();
+  const {
+    searchTerm,
+    setSearchTerm,
+    filterDepartment,
+    setFilterDepartment,
+    departments,
+    filteredEmployees
+  } = useEmployeeFilters(employees);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const employeesRef = ref(rtdb, 'employees');
-    const unsubscribe = onValue(employeesRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const employeeList = Object.entries(data).map(([id, values]) => ({
-          id, 
-          ...(values as Omit<Employee, 'id'>)
-        }));
-        setEmployees(employeeList);
-      } else {
-        setEmployees([]);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this employee?')) {
@@ -47,151 +39,90 @@ export default function Employees() {
     navigate('/add-employee', { state: { employee } });
   };
 
-  // department filter
-  const departments = [...new Set(employees.map(emp => emp.department))].filter(Boolean);
+  const newThisYear = employees.filter(emp => {
+    const startDate = new Date(emp.startDate);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    return startDate > oneYearAgo;
+  }).length;
 
-  // Filtering employees based on search and department
-  const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.position.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = !filterDepartment || employee.department === filterDepartment;
-    return matchesSearch && matchesDepartment;
-  });
+  const departmentOptions = departments.map(dept => ({ value: dept, label: dept }));
 
   return (
-    <div className="common-background">
-      <div className="page-container">
-        <Header />
-        
-        <div className="mt-8">
-          {/* Navigation */}
-          <div className="flex items-center justify-between mb-8">
-            <button onClick={() => navigate('/')} className="back-button">
-              <span className="text-xl">←</span>
-              Back to Home
-            </button>
-            <button
-              onClick={() => navigate('/add-employee')}
-              className="gradient-button flex items-center gap-2 px-6 py-3"
-            >
-              <span className="text-lg">➕</span>
-              Add New Employee
-            </button>
-          </div>
-
-          {/* Title Section */}
-          <div className="text-center mb-12">
-            <h1 className="page-title">Employee Directory</h1>
-            <p className="page-subtitle">Manage and view all your team members in one place</p>
-          </div>
-
-          {/* Filters Section */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="card-container">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="form-label">Search Employees</label>
-                  <input
-                    type="text"
-                    placeholder="Search by name, email, or position..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="form-input focus:ring-cyan-400"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Filter by Department</label>
-                  <select
-                    value={filterDepartment}
-                    onChange={(e) => setFilterDepartment(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
-                  >
-                    <option value="">All Departments</option>
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Statistics Cards */}
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="stats-card">
-                <div className="text-3xl font-bold text-cyan-400">{employees.length}</div>
-                <div className="text-slate-300 text-sm">Total Employees</div>
-              </div>
-              <div className="stats-card">
-                <div className="text-3xl font-bold text-purple-400">{departments.length}</div>
-                <div className="text-slate-300 text-sm">Departments</div>
-              </div>
-              <div className="stats-card">
-                <div className="text-3xl font-bold text-pink-400">{filteredEmployees.length}</div>
-                <div className="text-slate-300 text-sm">Filtered Results</div>
-              </div>
-              <div className="stats-card">
-                <div className="text-3xl font-bold text-green-400">
-                  {employees.filter(emp => {
-                    const startDate = new Date(emp.startDate);
-                    const oneYearAgo = new Date();
-                    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-                    return startDate > oneYearAgo;
-                  }).length}
-                </div>
-                <div className="text-slate-300 text-sm">New This Year</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Table Section */}
-          <div className="max-w-7xl mx-auto">
-            <div className="card-container">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
-                  <div className="w-2 h-8 bg-gradient-to-b from-pink-400 to-cyan-500 rounded-full"></div>
-                  Team Members ({filteredEmployees.length})
-                </h2>
-                <div className="text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded-full">
-                  {searchTerm || filterDepartment ? `Filtered: ${filteredEmployees.length}` : `Total: ${employees.length}`}
-                </div>
-              </div>
-              
-              {filteredEmployees.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">👥</div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    {employees.length === 0 ? 'No Employees Added Yet' : 'No Employees Found'}
-                  </h3>
-                  <p className="text-slate-300 mb-6">
-                    {employees.length === 0 
-                      ? 'Get started by adding your first team member.' 
-                      : 'Try adjusting your search or filter criteria.'}
-                  </p>
-                  {employees.length === 0 && (
-                    <button
-                      onClick={() => navigate('/add-employee')}
-                      className="px-6 py-3 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    >
-                      Add First Employee
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-xl overflow-hidden border border-slate-600">
-                  <Table 
-                    employees={filteredEmployees}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                </div>
-              )}
-            </div>
+    <Layout
+      title="Employee Directory"
+      subtitle="Manage and view all your team members in one place"
+      showAddButton={true}
+    >
+      {/* Filters Section */}
+      <div className="max-w-4xl mx-auto mb-8">
+        <div className="card-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Search Employees">
+              <Input
+                placeholder="Search by name, email, or position..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+                focusColor="cyan"
+              />
+            </FormField>
+            <FormField label="Filter by Department">
+              <Select
+                value={filterDepartment}
+                onChange={setFilterDepartment}
+                options={departmentOptions}
+                placeholder="All Departments"
+                focusColor="purple"
+              />
+            </FormField>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Statistics Cards */}
+      <div className="max-w-6xl mx-auto mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatsCard value={employees.length} label="Total Employees" color="cyan" />
+          <StatsCard value={departments.length} label="Departments" color="purple" />
+          <StatsCard value={filteredEmployees.length} label="Filtered Results" color="pink" />
+          <StatsCard value={newThisYear} label="New This Year" color="green" />
+        </div>
+      </div>
+
+      {/* Table Section */}
+      <div className="max-w-7xl mx-auto">
+        <div className="card-container">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
+              <div className="w-2 h-8 bg-gradient-to-b from-pink-400 to-cyan-500 rounded-full"></div>
+              Team Members ({filteredEmployees.length})
+            </h2>
+            <div className="text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded-full">
+              {searchTerm || filterDepartment ? `Filtered: ${filteredEmployees.length}` : `Total: ${employees.length}`}
+            </div>
+          </div>
+          
+          {filteredEmployees.length === 0 ? (
+            <EmptyState
+              icon="👥"
+              title={employees.length === 0 ? 'No Employees Added Yet' : 'No Employees Found'}
+              description={employees.length === 0 
+                ? 'Get started by adding your first team member.' 
+                : 'Try adjusting your search or filter criteria.'}
+              actionLabel={employees.length === 0 ? 'Add First Employee' : undefined}
+              onAction={employees.length === 0 ? () => navigate('/add-employee') : undefined}
+            />
+          ) : (
+            <div className="rounded-xl overflow-hidden border border-slate-600">
+              <Table 
+                employees={filteredEmployees}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
   );
 }

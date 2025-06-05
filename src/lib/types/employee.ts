@@ -6,3 +6,13 @@ export interface Employee {
   department: string;
   startDate: string;
 }
+
+export interface InputProps {
+  type?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: boolean;
+  focusColor?: 'cyan' | 'purple' | 'pink';
+  required?: boolean;
+}
