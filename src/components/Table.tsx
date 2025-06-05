@@ -1,11 +1,5 @@
 import React from 'react';
-import type { Employee } from '../lib/types/employee';
-
-interface TableProps {
-  employees: Employee[];
-  onEdit: (employee: Employee) => void;
-  onDelete: (id: string) => void;
-}
+import type { TableProps } from '../lib/types/table';
 
 export const Table: React.FC<TableProps> = ({ employees, onEdit, onDelete }) => {
   return (
@@ -28,7 +22,6 @@ export const Table: React.FC<TableProps> = ({ employees, onEdit, onDelete }) => 
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Start Date
             </th>
-            {/*     */}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">

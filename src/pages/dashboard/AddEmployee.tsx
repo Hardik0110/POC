@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { rtdb } from '../../lib/utils/firebase';
 import type { Employee } from '../../lib/types/employee';
 import { Header } from '../../components/Header';
+import { validateEmployee, validateEmployeeField, type EmployeeFormData } from '../../lib/validations/addEmployee';
 
 export default function AddEmployee() {
   const [formData, setFormData] = useState<Omit<Employee, 'id'>>({
@@ -15,6 +16,7 @@ export default function AddEmployee() {
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,10 +34,45 @@ export default function AddEmployee() {
     }
   }, [location.state]);
 
+  const validateField = (field: keyof EmployeeFormData, value: unknown) => {
+    const result = validateEmployeeField(field, value);
+    if (!result.success) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: result.error.errors[0].message
+      }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleChange = (field: keyof EmployeeFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    validateField(field, value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
+    const validationResult = validateEmployee(formData);
+    
+    if (!validationResult.success) {
+      const newErrors: Partial<Record<keyof EmployeeFormData, string>> = {};
+      validationResult.error.errors.forEach(error => {
+        if (error.path[0]) {
+          newErrors[error.path[0] as keyof EmployeeFormData] = error.message;
+        }
+      });
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (editId) {
         // Update existing employee
@@ -127,10 +164,15 @@ export default function AddEmployee() {
                     type="text"
                     placeholder="Enter full name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                    onChange={(e) => handleChange('name', e.target.value)}
+                    className={`w-full px-4 py-3 bg-slate-800/50 border ${
+                      errors.name ? 'border-red-500' : 'border-slate-600'
+                    } rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300`}
                     required
                   />
+                  {errors.name && (
+                    <p className="text-red-400 text-sm mt-1">{errors.name}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -139,10 +181,15 @@ export default function AddEmployee() {
                     type="email"
                     placeholder="Enter email address"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    className={`w-full px-4 py-3 bg-slate-800/50 border ${
+                      errors.email ? 'border-red-500' : 'border-slate-600'
+                    } rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300`}
                     required
                   />
+                  {errors.email && (
+                    <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -151,17 +198,22 @@ export default function AddEmployee() {
                     type="text"
                     placeholder="Enter position"
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300"
+                    onChange={(e) => handleChange('position', e.target.value)}
+                    className={`w-full px-4 py-3 bg-slate-800/50 border ${
+                      errors.position ? 'border-red-500' : 'border-slate-600'
+                    } rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300`}
                     required
                   />
+                  {errors.position && (
+                    <p className="text-red-400 text-sm mt-1">{errors.position}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-300">Department *</label>
                   <select
                     value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    onChange={(e) => handleChange('department', e.target.value)}
                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 appearance-none cursor-pointer"
                     required
                   >
@@ -170,6 +222,9 @@ export default function AddEmployee() {
                     <option value="backend" className="bg-slate-800">Backend</option>
                     <option value="aiml" className="bg-slate-800">AI/ML</option>
                   </select>
+                  {errors.department && (
+                    <p className="text-red-400 text-sm mt-1">{errors.department}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2 md:col-span-2">
@@ -177,10 +232,13 @@ export default function AddEmployee() {
                   <input
                     type="date"
                     value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    onChange={(e) => handleChange('startDate', e.target.value)}
                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 cursor-pointer"
                     required
                   />
+                  {errors.startDate && (
+                    <p className="text-red-400 text-sm mt-1">{errors.startDate}</p>
+                  )}
                 </div>
                 
                 <div className="md:col-span-2 flex gap-4 justify-end">
